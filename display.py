@@ -32,7 +32,7 @@ p = pifx.PIFX(api_key="cbc0065302332058a48ebe1a5fc3f0ee6e3c6c7fb714170e77373c2a6
 selector = 'label:Bedroom'
 
 def getFont(size):
-    return ImageFont.truetype("/usr/local/share/fonts/courier-prime-sans.ttf", size=size)
+    return ImageFont.truetype(os.path.join(sys.path[0], "courier-prime-sans.ttf"), size=size)
 
 def get_debounced_cb(onstart=None, onend=None):
     last_change = datetime.datetime.min
