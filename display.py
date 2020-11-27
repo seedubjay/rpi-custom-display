@@ -74,15 +74,6 @@ def get_click_cb(onclick=None, onlong=None, hold_time=.5):
     
     return get_debounced_cb(start, end)
 
-def get_color_change(duration, brightness=0, temp=0):
-    def f():
-        color = light.get_color()
-        color[2] = min(max(color[2]+int(brightness*65536),0),65535)
-        color[2] = min(max(color[3]+temp,2500),9000)
-        if color[2] > 0 and light.get_power() == 0: light.set_power("on")
-        light.set_color(color, duration)
-    return f
-
 active_page = None
 time_until_clock = 0
 
@@ -174,6 +165,15 @@ def start_timer():
 def stop_timer():
     global active_page
     active_page = None
+
+def get_color_change(duration, brightness=0, temp=0):
+    def f():
+        color = [*light.get_color()]
+        color[2] = min(max(color[2]+int(brightness*65536),0),65535)
+        color[3] = min(max(color[3]+temp,2500),9000)
+        if color[2] > 0 and light.get_power() == 0: light.set_power("on")
+        light.set_color(color, duration, True)
+    return f
 
 buttons = [
     (13, get_click_cb(lambda: light.set_power(65535-light.get_power(), .5))),
