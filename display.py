@@ -167,7 +167,7 @@ def stop_timer():
     active_page = None
 
 color_cache = [0,0,0,0]
-color_cache_time = datetime.datetime(0,0,0)
+color_cache_time = datetime.datetime(1970,1,1)
 
 def get_color_change(duration, brightness=0, temp=0):
     def f():
