@@ -179,14 +179,14 @@ def get_color_change(duration, brightness=0, temp=0):
         color_cache[2] = min(max(color_cache[2]+int(brightness*65536),0),65535)
         color_cache[3] = min(max(color_cache[3]+temp,1500),9000)
         if color_cache[2] > 0: light.set_power("on", True)
-        light.set_color(color_cache, duration, True)
+        light.set_color(color_cache, 1000*duration, True)
         if color_cache[2] == 0:
             time.sleep(duration+.1)
             light.set_power("off", True)
     return f
 
 buttons = [
-    (13, get_click_cb(lambda: light.set_power(65535-light.get_power(), .5))),
+    (13, get_click_cb(lambda: light.set_power(65535-light.get_power(), 500))),
     (19, get_click_cb(get_color_change(.1,brightness=.1), get_color_change(.3,brightness=1))),
     (6, get_click_cb(get_color_change(.1,brightness=-.1), get_color_change(.3,brightness=-1))),
     (5, get_click_cb(get_color_change(.1,temp=500))),
