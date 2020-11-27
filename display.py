@@ -171,6 +171,8 @@ color_cache_time = datetime.datetime(1970,1,1)
 
 def get_color_change(duration, brightness=0, temp=0):
     def f():
+        global color_cache
+        global color_cache_time
         if datetime.datetime.now() - color_cache_time > datetime.timedelta(minutes=1):
             color_cache = [*light.get_color()]
             color_cache_time = datetime.datetime.now()
