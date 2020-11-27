@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 import time
-import pifx
+import lifxlan
 import math
 import sys
 import os
@@ -28,8 +28,7 @@ socket.setdefaulttimeout(3)
 
 margin=4
 
-p = pifx.PIFX(api_key="cbc0065302332058a48ebe1a5fc3f0ee6e3c6c7fb714170e77373c2a6a2707c7")
-selector = 'label:Bedroom'
+light = lifxlan.Light("D0:73:D5:58:62:32", "192.168.2.239")
 
 def getFont(size):
     return ImageFont.truetype(os.path.join(sys.path[0], "courier-prime-sans.ttf"), size=size)
@@ -77,14 +76,7 @@ def get_click_cb(onclick=None, onlong=None, hold_time=.5):
 
 def get_brightness_change(duration, brightness):
     def f():
-        if brightness > 0:
-            p.state_delta(selector, power="on", duration=duration, brightness=brightness)
-        else:
-            p.state_delta(selector, duration=duration, brightness=brightness)
-            time.sleep(3)
-            l = p.list_lights(selector)[0]
-            if l["power"] == "on" and l["brightness"] == 0:
-                p.set_state(selector, duration=0, power="off")
+        light.set_power(light.get_power() + brightness*65536, duration)
     return f
 
 active_page = None
@@ -180,11 +172,11 @@ def stop_timer():
     active_page = None
 
 buttons = [
-    (13, get_click_cb(lambda: p.toggle_power(selector, duration=.5))),
+    (13, get_click_cb(lambda: light.set_power("off", .5)),
     (19, get_click_cb(get_brightness_change(.1,.1), get_brightness_change(.3,1))),
     (6, get_click_cb(get_brightness_change(.1,-.1), get_brightness_change(.3,-1))),
-    (5, get_click_cb(lambda: p.state_delta(selector, duration=.1, kelvin=500))),
-    (26, get_click_cb(lambda: p.state_delta(selector, duration=.1, kelvin=-500))),
+    (5, get_click_cb(lambda: light.set_color(light.get_color() + 500, .1)),
+    (26, get_click_cb(lambda: light.set_color(light.get_color() - 500, .1)),
     (16, get_click_cb(show_rowing, show_technical_info, 3)),
     (20, get_click_cb(start_timer, stop_timer)),
     (21, get_click_cb(onlong=lambda: os.system("shutdown -h now"), hold_time=10))
