@@ -175,8 +175,8 @@ buttons = [
     (13, get_click_cb(lambda: light.set_power("off", .5)),
     (19, get_click_cb(get_brightness_change(.1,.1), get_brightness_change(.3,1))),
     (6, get_click_cb(get_brightness_change(.1,-.1), get_brightness_change(.3,-1))),
-    (5, get_click_cb(lambda: light.set_color(light.get_color() + 500, .1)),
-    (26, get_click_cb(lambda: light.set_color(light.get_color() - 500, .1)),
+    (5, get_click_cb(lambda: light.set_color(light.get_color() + 500, .1))),
+    (26, get_click_cb(lambda: light.set_color(light.get_color() - 500, .1))),
     (16, get_click_cb(show_rowing, show_technical_info, 3)),
     (20, get_click_cb(start_timer, stop_timer)),
     (21, get_click_cb(onlong=lambda: os.system("shutdown -h now"), hold_time=10))
