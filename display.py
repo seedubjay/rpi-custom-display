@@ -166,13 +166,18 @@ def stop_timer():
     global active_page
     active_page = None
 
+color_cache = [0,0,0,0]
+color_cache_time = datetime.datetime(0,0,0)
+
 def get_color_change(duration, brightness=0, temp=0):
     def f():
-        color = [*light.get_color()]
-        color[2] = min(max(color[2]+int(brightness*65536),0),65535)
-        color[3] = min(max(color[3]+temp,2500),9000)
-        if color[2] > 0 and light.get_power() == 0: light.set_power("on")
-        light.set_color(color, duration, True)
+        if datetime.datetime.now() - color_cache_time > datetime.timedelta(minutes=1):
+            color_cache = [*light.get_color()]
+            color_cache_time = datetime.datetime.now()
+        color_cache[2] = min(max(color_cache[2]+int(brightness*65536),0),65535)
+        color_cache[3] = min(max(color_cache[3]+temp,1500),9000)
+        # if color_cache[2] > 0 and light.get_power() == 0: light.set_power("on")
+        light.set_color(color_cache, duration, True)
     return f
 
 buttons = [
