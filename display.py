@@ -176,8 +176,8 @@ def get_color_change(duration, brightness=0, temp=0):
             color_cache_time = datetime.datetime.now()
         color_cache[2] = min(max(color_cache[2]+int(brightness*65536),0),65535)
         color_cache[3] = min(max(color_cache[3]+temp,1500),9000)
-        # if color_cache[2] > 0 and light.get_power() == 0: light.set_power("on")
         light.set_color(color_cache, duration, True)
+        light.set_power("on" if color_cache[2] > 0 else "off", True)
     return f
 
 buttons = [
