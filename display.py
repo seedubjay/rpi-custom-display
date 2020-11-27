@@ -74,9 +74,13 @@ def get_click_cb(onclick=None, onlong=None, hold_time=.5):
     
     return get_debounced_cb(start, end)
 
-def get_brightness_change(duration, brightness):
+def get_color_change(duration, brightness=0, temp=0):
     def f():
-        light.set_power(light.get_power() + brightness*65536, duration)
+        color = light.get_color()
+        color[2] = min(max(color[2]+int(brightness*65536),0),65535)
+        color[2] = min(max(color[3]+temp,2500),9000)
+        if color[2] > 0 and light.get_power() == 0: light.set_power("on")
+        light.set_color(color, duration)
     return f
 
 active_page = None
@@ -172,14 +176,14 @@ def stop_timer():
     active_page = None
 
 buttons = [
-    (13, get_click_cb(lambda: light.set_power("off", .5)),
-    (19, get_click_cb(get_brightness_change(.1,.1), get_brightness_change(.3,1))),
-    (6, get_click_cb(get_brightness_change(.1,-.1), get_brightness_change(.3,-1))),
-    (5, get_click_cb(lambda: light.set_color(light.get_color() + 500, .1))),
-    (26, get_click_cb(lambda: light.set_color(light.get_color() - 500, .1))),
+    (13, get_click_cb(lambda: light.set_power(65535-light.get_power(), .5))),
+    (19, get_click_cb(get_color_change(.1,brightness=.1), get_color_change(.3,brightness=1))),
+    (6, get_click_cb(get_color_change(.1,brightness=-.1), get_color_change(.3,brightness=-1))),
+    (5, get_click_cb(get_color_change(.1,temp=500))),
+    (26, get_click_cb(get_color_change(.1,temp=-500))),
     (16, get_click_cb(show_rowing, show_technical_info, 3)),
     (20, get_click_cb(start_timer, stop_timer)),
-    (21, get_click_cb(onlong=lambda: os.system("shutdown -h now"), hold_time=10))
+    (21, get_click_cb(onlong=lambda: os.system("shutdown -h now"), hold_time=8))
 ]
 
 GPIO.setwarnings(False)
