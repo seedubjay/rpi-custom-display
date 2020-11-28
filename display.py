@@ -262,7 +262,7 @@ def main():
                 minutes, rem = divmod(rem, 60)
                 minutes = int(minutes)
                 today_time = f'{hours:02}:{minutes:02}'
-                today_date = 'FOCUS'
+                today_date = 'STFU AND WORK'
 
         if active_page == None:
             today_date = now.strftime("%d %b %Y")
