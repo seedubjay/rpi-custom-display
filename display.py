@@ -251,7 +251,7 @@ def main():
             if remaining < datetime.timedelta():
                 active_page = None
             else:
-                hours, rem = divmod(remaining.total_seconds(), 3600)
+                hours, rem = divmod(remaining.total_seconds()+60, 3600)
                 hours = int(hours)
                 minutes, rem = divmod(rem, 60)
                 minutes = int(minutes)
