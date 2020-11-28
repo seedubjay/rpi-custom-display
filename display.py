@@ -179,7 +179,7 @@ def add_time_to_blacklist():
     global blacklist_end_time
 
     if active_page != "blacklist":
-        os.system("pihole --wild $(cat blacklist.txt)")
+        os.system(f"pihole --wild $(cat {os.path.join(sys.path[0], 'blacklist.txt')})")
         os.system("systemctl stop lighttpd")
     
     active_page = "blacklist"
@@ -253,7 +253,7 @@ def main():
         elif active_page == "blacklist":
             remaining = blacklist_end_time - datetime.datetime.now()
             if remaining < datetime.timedelta():
-                os.system("pihole --wild -d $(cat blacklist.txt)")
+                os.system(f"pihole --wild -d $(cat {os.path.join(sys.path[0], 'blacklist.txt')})")
                 os.system("systemctl start lighttpd")
                 active_page = None
             else:
