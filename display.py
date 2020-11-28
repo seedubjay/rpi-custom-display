@@ -248,7 +248,6 @@ def main():
                 today_date = ''
         elif active_page == "blacklist":
             remaining = blacklist_end_time - datetime.datetime.now()
-            print("time remaining:", remaining)
             if remaining < datetime.timedelta():
                 active_page = None
             else:
