@@ -247,11 +247,12 @@ def main():
                 today_time = f'{minutes:02}:{seconds:02}'
                 today_date = ''
         elif active_page == "blacklist":
-            remaining = datetime.datetime.now() - blacklist_end_time
+            remaining = blacklist_end_time - datetime.datetime.now()
+            print("time remaining:", remaining)
             if remaining < datetime.timedelta():
                 active_page = None
             else:
-                hours, rem = divmod(elapsed.total_seconds(), 3600)
+                hours, rem = divmod(remaining.total_seconds(), 3600)
                 hours = int(hours)
                 minutes, rem = divmod(rem, 60)
                 minutes = int(minutes)
@@ -262,7 +263,7 @@ def main():
             today_date = now.strftime("%d %b %Y")
             today_time = now.strftime("%H:%M") if now.microsecond < 500000 else now.strftime("%H %M")
         if (today_time != today_last_time or today_date != today_last_date) and time_until_clock < .0001:
-            if active_page != "timer": active_page = None
+            if active_page not in ["timer", "blacklist"]: active_page = None
             today_last_time = today_time
             today_last_date = today_date
             with canvas(device) as draw:
