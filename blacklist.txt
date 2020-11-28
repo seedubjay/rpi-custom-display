@@ -66,6 +66,7 @@ wikipedia.org
 wired.com
 xkcd.com
 youtube.com
+googlevideo.com
 nytimes.com
 washingtonpost.com
 fivethirtyeight.com
