@@ -209,7 +209,7 @@ buttons = [
     (26, get_click_cb(get_color_change(.1,temp=-500))),
     (16, get_click_cb(show_rowing, show_technical_info, 3)),
     (20, get_click_cb(start_timer, stop_timer)),
-    (21, get_click_cb(add_time_to_blacklist, lambda: os.system("shutdown -h now"), 8))
+    (21, get_click_cb(add_time_to_blacklist))
 ]
 
 GPIO.setwarnings(False)
