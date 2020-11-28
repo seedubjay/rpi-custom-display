@@ -81,6 +81,9 @@ def show_rowing():
     global active_page
     global time_until_clock
 
+    if active_page == "blacklist":
+        return
+
     if active_page == "technical_info":
         active_page = None
         time_until_clock = 0
@@ -150,6 +153,9 @@ def start_timer():
     global active_page
     global timer_total
     global timer_last_start
+
+    if active_page == "blacklist": return
+
     if active_page != "timer":
         active_page = "timer"
         time_until_clock = 0
@@ -164,7 +170,16 @@ def start_timer():
 
 def stop_timer():
     global active_page
-    active_page = None
+    if active_page == "timer": active_page = None
+
+blacklist_end_time = datetime.datetime(1970,1,1)
+
+def add_time_to_blacklist():
+    global active_page
+    global blacklist_end_time
+
+    active_page = "blacklist"
+    blacklist_end_time = max(datetime.datetime.now(), blacklist_end_time) + datetime.timedelta(minutes=10)
 
 color_cache = [0,0,0,0]
 color_cache_time = datetime.datetime(1970,1,1)
@@ -175,7 +190,8 @@ def get_color_change(duration, brightness=0, temp=0):
         global color_cache_time
         if datetime.datetime.now() - color_cache_time > datetime.timedelta(minutes=1):
             color_cache = [*light.get_color()]
-            color_cache_time = datetime.datetime.now()
+        color_cache_time = datetime.datetime.now()
+
         color_cache[2] = min(max(color_cache[2]+int(brightness*65536),0),65535)
         color_cache[3] = min(max(color_cache[3]+temp,1500),9000)
         if color_cache[2] > 0: light.set_power("on", True)
@@ -208,6 +224,7 @@ def main():
     global active_page
     global timer_total
     global timer_last_start
+    global blacklist_end_time
 
     today_last_time = None
     today_last_date = None
@@ -229,7 +246,19 @@ def main():
             else:
                 today_time = f'{minutes:02}:{seconds:02}'
                 today_date = ''
-        else:
+        elif active_page == "blacklist":
+            remaining = datetime.datetime.now() - blacklist_end_time
+            if remaining < datetime.timedelta():
+                active_page = None
+            else:
+                hours, rem = divmod(elapsed.total_seconds(), 3600)
+                hours = int(hours)
+                minutes, rem = divmod(rem, 60)
+                minutes = int(minutes)
+                today_time = f'{hours:02}:{minutes:02}'
+                today_date = 'FOCUS'
+
+        if active_page == None:
             today_date = now.strftime("%d %b %Y")
             today_time = now.strftime("%H:%M") if now.microsecond < 500000 else now.strftime("%H %M")
         if (today_time != today_last_time or today_date != today_last_date) and time_until_clock < .0001:
