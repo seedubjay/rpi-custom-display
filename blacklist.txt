@@ -62,7 +62,6 @@ twitter.com
 vice.com
 vimeo.com
 wikia.com
-wikipedia.org
 wired.com
 xkcd.com
 youtube.com
