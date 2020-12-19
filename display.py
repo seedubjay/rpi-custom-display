@@ -135,7 +135,7 @@ def show_technical_info():
     global time_until_clock
 
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("https://www.bbc.co.uk", 80))
+    s.connect(("bbc.co.uk", 80))
     ip = s.getsockname()[0]
 
     mac = ":".join(["{:02x}".format((uuid.getnode() >> i) & 0xff) for i in range(0,48,8)][::-1])
