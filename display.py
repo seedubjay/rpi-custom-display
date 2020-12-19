@@ -236,6 +236,8 @@ def main():
     today_last_date = None
 
     while True:
+        today_last_time = None
+        today_last_date = None
         now = datetime.datetime.now()
         if active_page == "timer":
             elapsed = timer_total + (now - timer_last_start if timer_last_start is not None else datetime.timedelta())
