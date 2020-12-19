@@ -120,7 +120,7 @@ def connected_to_internet():
 
     if datetime.datetime.now() - last_internet_check > datetime.timedelta(seconds=10):
         try:
-            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("8.8.8.8",53))
+            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("bbc.co.uk",53))
             connected_to_internet_cache = True
         except socket.error as ex:
             logging.debug(ex)
@@ -132,9 +132,7 @@ def show_technical_info():
     global active_page
     global time_until_clock
 
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("8.8.8.8", 80))
-    ip = s.getsockname()[0]
+    ip = socket.gethostbyname(socket.gethostname())
 
     mac = ":".join(["{:02x}".format((uuid.getnode() >> i) & 0xff) for i in range(0,48,8)][::-1])
 
@@ -277,8 +275,8 @@ def main():
                 draw.text((margin, 12), today_time, fill="white", font=getFont(33))
                 draw.text((margin, 42), today_date, fill="white", font=getFont(15))
 
-                if not connected_to_internet():
-                    draw.ellipse((device.width-4-margin,margin,device.width-margin,margin+4), fill="white")
+#                if not connected_to_internet():
+#                    draw.ellipse((device.width-4-margin,margin,device.width-margin,margin+4), fill="white")
 
         time.sleep(0.1)
         time_until_clock = max(time_until_clock - .1, 0)
