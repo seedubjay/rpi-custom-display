@@ -120,6 +120,8 @@ def connected_to_internet():
 
     if datetime.datetime.now() - last_internet_check > datetime.timedelta(seconds=10):
         try:
+            # need to find a proper test for this
+            raise Exception()
             socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("bbc.co.uk",53))
             connected_to_internet_cache = True
         except socket.error as ex:
