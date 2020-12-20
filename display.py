@@ -15,6 +15,8 @@ from PIL import ImageFont
 
 import signal
 
+from spotify import sp
+
 
 # logging
 logging.basicConfig(
@@ -74,8 +76,96 @@ def get_click_cb(onclick=None, onlong=None, hold_time=.5):
     
     return get_debounced_cb(start, end)
 
+spotify_mode = False
+
+def get_click_cb_by_song(light_cb, song_cb):
+    global spotify_mode
+    def f(pin):
+        if spotify_mode: song_cb(pin)
+        else: light_cb(pin)
+    return f
+
 active_page = None
 time_until_clock = 0
+
+last_spotify_check = datetime.datetime.min
+spotify_check_cache = None
+
+def get_spotify_device():
+    global last_spotify_check
+    global spotify_check_cache
+
+    if datetime.datetime.now() - last_spotify_check > datetime.timedelta(seconds=15):
+        last_spotify_check = datetime.datetime.now()
+        ids = [d['id'] for d in sp.devices()['devices'] if d['is_active']]
+        spotify_check_cache = ids[0] if len(ids) > 0 else None
+
+    return spotify_check_cache
+
+last_song_check = datetime.datetime.min
+song_check_cache = None
+
+def get_spotify_song(force=False):
+    global last_song_check
+    global song_check_cache
+    global spotify_mode
+
+    if force or datetime.datetime.now() - last_song_check > datetime.timedelta(seconds=5):
+        last_song_check = datetime.datetime.now()
+        song_check_cache = sp.current_user_playing_track()
+
+    if song_check_cache is None: spotify_mode = False
+
+    return song_check_cache
+
+def playpause_song():
+    global spotify_mode
+
+    song = get_spotify_song(True)
+    if song is None: return
+
+    try:
+        if song['is_playing']: sp.pause_playback()
+        else: sp.start_playback()
+    except:
+        spotify_mode = False
+
+def next_song():
+    global spotify_mode
+
+    try:
+        sp.next_track()
+        time.sleep(.4)
+        get_spotify_song(True)
+    except:
+        pass
+
+def previous_song():
+    global spotify_mode
+
+    try:
+        sp.previous_track()
+        time.sleep(.4)
+        get_spotify_song(True)
+    except:
+        pass
+
+def show_spotify():
+    global spotify_mode
+    global active_page
+    global time_until_clock
+
+    if active_page == "technical_info":
+        active_page = None
+        time_until_clock = 0
+        return
+
+    spotify_mode = not spotify_mode
+    if spotify_mode:
+        song = get_spotify_song(True)
+        if song is None:
+            spotify_mode = False
+    logging.info(f"show song: {spotify_mode}")
 
 def show_rowing():
     global active_page
@@ -208,12 +298,21 @@ def get_color_change(duration, brightness=0, temp=0):
     return f
 
 buttons = [
-    (13, get_click_cb(lambda: light.set_power(65535-light.get_power(), 500))),
-    (19, get_click_cb(get_color_change(.1,brightness=.1), get_color_change(.3,brightness=1))),
-    (6, get_click_cb(get_color_change(.1,brightness=-.1), get_color_change(.3,brightness=-1))),
-    (5, get_click_cb(get_color_change(.1,temp=500))),
-    (26, get_click_cb(get_color_change(.1,temp=-500))),
-    (16, get_click_cb(show_rowing, show_technical_info, 3)),
+    (13, get_click_cb_by_song(
+        get_click_cb(lambda: light.set_power(65535-light.get_power(), 500)),
+        get_click_cb(playpause_song)
+    )),
+    (19, get_click_cb(get_color_change(.1,brightness=-.1), get_color_change(.3,brightness=-1))),
+    (6, get_click_cb(get_color_change(.1,brightness=.1), get_color_change(.3,brightness=1))),
+    (5, get_click_cb_by_song(
+        get_click_cb(get_color_change(.1,temp=-500)),
+        get_click_cb(previous_song)
+    )),
+    (26, get_click_cb_by_song(
+        get_click_cb(get_color_change(.1,temp=500)),
+        get_click_cb(next_song)
+    )),
+    (16, get_click_cb(show_spotify, show_technical_info, 3)),
     (20, get_click_cb(start_timer, stop_timer))#,
 #    (21, get_click_cb(add_time_to_blacklist))
 ]
@@ -231,6 +330,7 @@ def main():
     global timer_total
     global timer_last_start
     global blacklist_end_time
+    global spotify_mode
 
     today_last_time = None
     today_last_date = None
@@ -269,7 +369,9 @@ def main():
                 today_date = 'STFU AND WORK'
 
         if active_page == None:
-            today_date = now.strftime("%d %b %Y")
+            song = get_spotify_song()
+            if spotify_mode: today_date = song['item']['name']
+            else: today_date = now.strftime("%d %b %Y")
             today_time = now.strftime("%H:%M") if now.microsecond < 500000 else now.strftime("%H %M")
         if (today_time != today_last_time or today_date != today_last_date) and time_until_clock < .0001:
             if active_page not in ["timer", "blacklist"]: active_page = None
@@ -281,8 +383,12 @@ def main():
                 draw.text((margin, 12), today_time, fill="white", font=getFont(33))
                 draw.text((margin, 42), today_date, fill="white", font=getFont(15))
 
-#                if not connected_to_internet():
-#                    draw.ellipse((device.width-4-margin,margin,device.width-margin,margin+4), fill="white")
+                if not spotify_mode and get_spotify_song() is not None:
+                    draw.polygon([
+                        (device.width-4-margin,device.height-margin),
+                        (device.width-margin,device.height-margin-2),
+                        (device.width-4-margin,device.height-margin-4)
+                    ], fill="white")
 
         time.sleep(0.1)
         time_until_clock = max(time_until_clock - .1, 0)

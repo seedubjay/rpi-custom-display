@@ -3,7 +3,8 @@ Description=Custom RPi display for mounted display and buttons
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /usr/local/display/display.py -i spi -d sh1106
+EnvironmentFile=/usr/local/display/spotipy.env
+ExecStart=/usr/bin/python3 /usr/local/display/display.py -i spi -d sh1106 --rotate 2
 
 [Install]
 WantedBy=multi-user.target
