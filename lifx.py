@@ -1,5 +1,6 @@
 import lifxlan
-from datetime import datetime
+from datetime import datetime, timedelta
+import time
 
 light = lifxlan.Light("D0:73:D5:58:62:32", "192.168.2.239")
 
