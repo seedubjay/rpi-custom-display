@@ -1,0 +1,10 @@
+[Unit]
+Description=Waiting to activate blacklist
+
+[Service]
+Restart=always
+RestartSec=30
+ExecStart=/bin/bash /home/pi/blacklist.sh
+
+[Install]
+WantedBy=multi-user.target
